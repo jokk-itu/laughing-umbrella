@@ -6,3 +6,4 @@ mongo-repl.key
 .erlang.cookie
 .idea
 .vscode
+build
