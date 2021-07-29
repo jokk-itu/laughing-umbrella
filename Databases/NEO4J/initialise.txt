@@ -1,0 +1,15 @@
+CREATE (d:Dish {name: 'Banankage', price: 30})
+
+CREATE (i:Ingredient {name: 'Banan', supplier: 'Rema 1000'}), (i:Ingredient {name: 'Chokolade', supplier: 'Rema 1000'})
+
+MATCH 
+	(d:Dish), 
+	(i:Ingredient) 
+WHERE d.name = 'Banankage' AND i.name = 'Banan'
+CREATE (d)-[r:IngredientInDish {iname: 'Banan', dname: 'Banankage', quantity: '100', unit: 'gram'}]->(i)
+
+MATCH 
+	(d:Dish), 
+	(i:Ingredient) 
+WHERE d.name = 'Banankage' AND i.name = 'Chokolade'
+CREATE (d)-[r:IngredientInDish {iname: 'Chokolade', dname: 'Banankage', quantity: '100', unit: 'gram'}]->(i)

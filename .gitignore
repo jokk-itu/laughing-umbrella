@@ -1,0 +1,6 @@
+[Bb]in
+[Oo]bj
+Frontend/node_modules
+volumes
+mongo-repl.key
+.erlang.cookie

@@ -1,0 +1,127 @@
+version: "3.8"
+
+networks:
+  databases:
+  internal:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.238.0/24
+
+services:  
+  
+  mssql_primary:
+    build:
+      context: ./MSSQL/
+      dockerfile: Dockerfile.Primary
+    container_name: mssql_primary
+    hostname: mssql_primary
+    domainname: lab.local
+    environment:
+      - SA_PASSWORD=Password12!
+      - ACCEPT_EULA=Y
+    ports:
+      - "1550:1433"
+    volumes:
+      - ./volumes/mssql/primary/data:/var/opt/mssql/data
+      - ./volumes/mssql/primary/log:/var/opt/mssql/log
+      - ./volumes/mssql/primary/secrets:/var/opt/mssql/secrets   
+    extra_hosts:
+      mssql_replica_1.lab.local: "172.16.238.22"
+      mssql_replica_2.lab.local: "172.16.238.23"
+    networks:
+      databases:
+        aliases:
+          - mssql_primary
+      internal:
+        ipv4_address: 172.16.238.21    
+           
+  mssql_replica_1:
+    build:
+      context: ./MSSQL/
+      dockerfile: Dockerfile.Replica
+    container_name: mssql_replica_1
+    hostname: mssql_replica_1
+    domainname: lab.local
+    environment:
+      - SA_PASSWORD=Password12!
+      - ACCEPT_EULA=Y
+    ports:
+      - "1551:1433"
+    volumes:
+      - ./volumes/mssql/replica1/data:/var/opt/mssql/data
+      - ./volumes/mssql/replica1/log:/var/opt/mssql/log
+      - ./volumes/mssql/replica1/secrets:/var/opt/mssql/secrets
+    depends_on: 
+      - mssql_primary
+    extra_hosts:
+      mssql_replica_2.lab.local: "172.16.238.23"
+      mssql_primary.lab.local: "172.16.238.21"
+    networks:
+      databases:
+        aliases:
+          - mssql_replica_1
+      internal:
+        ipv4_address: 172.16.238.22
+        
+  mssql_replica_2:
+    build:
+      context: ./MSSQL/
+      dockerfile: Dockerfile.Replica
+    container_name: mssql_replica_2
+    hostname: mssql_replica_2
+    domainname: lab.local
+    environment:
+      - SA_PASSWORD=Password12!
+      - ACCEPT_EULA=Y
+    ports:
+      - "1552:1433"
+    volumes:
+      - ./volumes/mssql/replica2/data:/var/opt/mssql/data
+      - ./volumes/mssql/replica2/log:/var/opt/mssql/log  
+      - ./volumes/mssql/replica2/secrets:/var/opt/mssql/secrets
+    depends_on: 
+      - mssql_primary  
+    extra_hosts:
+      mssql_replica_1.lab.local: "172.16.238.22"
+      mssql_primary.lab.local: "172.16.238.21"
+    networks:
+      databases:
+        aliases:
+          - mssql_replica_2
+      internal:
+        ipv4_address: 172.16.238.23
+        
+  neo4j:
+    build:
+      context: ./NEO4J
+      dockerfile: Dockerfile
+    container_name: neo4j
+    networks:
+      databases:
+        aliases:
+          - neo4j
+    volumes:
+      - ./volumes/neo4j/data:/data
+      - ./volumes/neo4j/logs:/logs
+      - ./volumes/neo4j/import:/var/lib/neo4j/import
+      - ./volumes/neo4j/plugins:/plugins
+    ports:
+      - "7474:7474"
+      - "7687:7687"  
+      
+  mongo:
+    image: mongo:5.0.1-focal
+    container_name: mongo
+    networks:
+      databases:
+        aliases:
+          - mongo
+    volumes:
+      - ./volumes/mongo/data:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: test
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin  

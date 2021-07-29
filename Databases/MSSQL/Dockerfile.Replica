@@ -1,0 +1,3 @@
+FROM jokk/sqlserver:latest
+
+ENTRYPOINT ["/opt/mssql/bin/sqlservr"]

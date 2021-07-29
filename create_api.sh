@@ -1,0 +1,1 @@
+dotnet new webapi --name $1 --framework net5.0 --no-https --tenant-id 3ea8a579-a1b4-4af9-b63e-7fdc82963153 --auth SingleOrg --default-scope api --client-id 895fe467-4fe0-4f4d-bd8e-ec38e486c5b0 --aad-instance https://login.microsoftonline.com/

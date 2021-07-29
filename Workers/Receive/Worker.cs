@@ -1,0 +1,42 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace Receive
+{
+    public class Worker : BackgroundService
+    {
+        private readonly ILogger<Worker> _logger;
+        private readonly IBusControl _busControl;
+
+        public Worker(ILogger<Worker> logger, IBusControl busControl)
+        {
+            _logger = logger;
+            _busControl = busControl;
+        }
+
+        public override async Task StartAsync(CancellationToken cancellationToken)
+        {
+            var timeoutCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await _busControl.StartAsync(timeoutCancellationTokenSource.Token);
+            await base.StartAsync(cancellationToken);
+        }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await _busControl.StopAsync(cancellationToken);
+            await base.StopAsync(cancellationToken);
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await Task.Delay(1000, stoppingToken);
+            }
+        }
+    }
+}

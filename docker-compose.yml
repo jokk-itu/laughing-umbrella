@@ -1,0 +1,156 @@
+version: "3.8"
+
+networks:
+  servicebus_net:
+  service_net:
+  databases:
+    external: true
+    name: databases_databases
+
+services:
+  sports_api:
+    build:
+      context: ./SportsService
+      dockerfile: Dockerfile
+    ports:
+      - "5000:80"
+    depends_on:
+      - servicebus
+      - logger
+    container_name: sports_api
+    networks:
+      - databases   
+      - service_net
+      
+  food_api:
+    build:
+      context: ./FoodService
+      dockerfile: Dockerfile
+    ports:
+      - "5002:80"
+    depends_on:
+      - servicebus
+      - logger
+    container_name: food_api
+    networks:
+      - databases
+      - service_net
+      
+  books_api:
+    build:
+      context: ./BookService
+      dockerfile: Dockerfile
+    ports:
+      - "5004:80"
+    depends_on:
+      - servicebus
+      - logger
+    container_name: books_api
+    networks:
+      - databases
+      - service_net       
+  
+  send_worker:
+    build:
+      context: ./Workers/Send
+      dockerfile: Dockerfile 
+    depends_on:
+      - servicebus
+    container_name: send_worker
+    networks:
+      - service_net
+      
+  receive_worker:
+    build:
+      context: ./Workers/Receive
+      dockerfile: Dockerfile
+    depends_on:
+      - servicebus
+    container_name: receive_worker
+    networks:
+      - service_net                    
+
+  client:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5003"
+    depends_on:
+      - sports_api
+    container_name: client
+    networks:
+      - service_net   
+    
+  logger:
+    image: datalust/seq:latest
+    ports:
+      - "5341:80"
+    environment:
+      - ACCEPT_EULA=Y
+    container_name: logger
+    networks:
+      service_net:
+        aliases:
+          - logger
+          
+  servicebus:
+    image: nginx
+    hostname: servicebus
+    container_name: servicebus_loadbalancer
+    ports:
+      - "5670:80"
+    volumes:
+      - ./Servicebus/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - servicebus_node_1
+      - servicebus_node_2
+      - servicebus_node_3  
+    networks:
+      service_net:
+        aliases:
+          - servicebus
+      servicebus_net:
+          
+  servicebus_node_1:
+    image: rabbitmq:3.9
+    command: bash -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
+    container_name: servicebus_node_1
+    hostname: servicebus_node_1
+    volumes:
+      - ./Servicebus/Node1/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./Servicebus/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+    networks:
+      servicebus_net:
+        aliases:
+          - servicebus_node_1
+  
+  servicebus_node_2:
+    image: rabbitmq:3.9
+    command: bash -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
+    depends_on:
+      - servicebus_node_1
+    hostname: servicebus_node_2
+    container_name: servicebus_node_2
+    volumes:
+      - ./Servicebus/Node2/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./Servicebus/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+    networks:
+      servicebus_net:
+        aliases:
+          - servicebus_node_2
+      
+  servicebus_node_3:
+    image: rabbitmq:3.9
+    command: bash -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
+    depends_on:
+      - servicebus_node_1
+    hostname: servicebus_node_3
+    container_name: servicebus_node_3
+    volumes:
+      - ./Servicebus/Node3/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./Servicebus/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+    networks:
+      servicebus_net:    
+        aliases:
+          - servicebus_node_3

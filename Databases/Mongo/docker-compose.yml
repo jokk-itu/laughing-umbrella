@@ -1,0 +1,38 @@
+mongo_replica_1: 
+    image: 5.0.1-focal
+    container_name: mongo_replica_1
+    ports:
+      - "1601:27017"
+    command: mongod --serviceExecutor adaptive --replSet rs1 --port 27017 --keyFile /etc/mongo-repl.key
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - ./volumes/mongo/replica_1/data:/data/db
+      - ./Mongo/mongo-repl.key:/etc/mongo-repl.key
+      
+  mongo_replica_2: 
+    image: 5.0.1-focal
+    container_name: mongo_replica_2
+    ports:
+      - "1602:27017"
+    command: mongod --serviceExecutor adaptive --replSet rs1 --port 27017 --keyFile /etc/mongo-repl.key
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - ./volumes/mongo/replica_2/data:/data/db
+      - ./Mongo/mongo-repl.key:/etc/mongo-repl.key
+      
+  mongo_replica_3: 
+    image: 5.0.1-focal
+    container_name: mongo_replica_3
+    ports:
+      - "1603:27017"
+    command: mongod --serviceExecutor adaptive --replSet rs1 --port 27017 --keyFile /etc/mongo-repl.key
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - ./volumes/mongo/replica_3/data:/data/db
+      - ./Mongo/mongo-repl.key:/etc/mongo-repl.key
