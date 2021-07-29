@@ -1,8 +1,10 @@
 using System;
 using GreenPipes;
 using MassTransit;
+using MassTransit.Pipeline.Observables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Receive.Observers;
 
 namespace Receive
 {
@@ -35,11 +37,16 @@ namespace Receive
                                 hostConfigurator.Username(hostContext.Configuration.GetSection("ServiceBus:Username").Value);
                                 hostConfigurator.Password(hostContext.Configuration.GetSection("ServiceBus:Password").Value);
                             });
+                            factoryConfigurator.ConnectConsumeObserver(new ConsumeObserver());
+                            factoryConfigurator.ConnectReceiveObserver(new ReceiveObserver());
                             factoryConfigurator.ReceiveEndpoint("account-service", endpointConfigurator =>
                             {
                                 endpointConfigurator.Lazy = true;
                                 endpointConfigurator.PrefetchCount = 20;
                                 endpointConfigurator.Consumer<AccountConsumer>();
+                                endpointConfigurator.Durable = false;
+                                endpointConfigurator.PrefetchCount = 100;
+                                endpointConfigurator.UseInMemoryOutbox();
                             });
                         });
                     });
