@@ -48,9 +48,28 @@ export class HttpClient
             });
     }
 
-    putJSON()
+    putJSON(url : URL, accessToken : string, data : Object)
     {
-        return jQuery.ajax();
+        return jQuery.ajax({
+            accepts:
+            {
+                json: 'application/json'
+            },
+            url: url,
+            headers: 
+            {
+                Authorization: 'Bearer' + accessToken
+            },
+            method: 'PUT',
+            data: data,
+            statusCode: 
+            {
+                404: () => {console.error('resource not found');},
+                401: () => {console.error('not authorized to access resource');},
+                500: () => {console.error('error occured serverside');}
+            },
+            timeout: 5000
+        });
     }
 
     deleteJSON()
@@ -58,8 +77,53 @@ export class HttpClient
         return jQuery.ajax();
     }
 
-    postJSON()
+    patchJSON(url : URL, accessToken : string, data : Object) 
     {
-        return jQuery.ajax();
+        return jQuery.ajax({
+            accepts:
+            {
+                json: 'application/json'
+            },
+            url: url,
+            headers: 
+            {
+                Authorization: 'Bearer' + accessToken
+            },
+            method: 'PATCH',
+            data: data,
+            statusCode: 
+            {
+                404: () => {console.error('resource not found');},
+                401: () => {console.error('not authorized to access resource');},
+                500: () => {console.error('error occured serverside');}
+            },
+            timeout: 5000
+        }
+        );
+    }
+
+    postJSON(url : URL, accessToken : string, data : Object)
+    {
+        return jQuery.ajax({
+            accepts:
+            {
+                json: 'application/json'
+            },
+            url: url,
+            headers: 
+            {
+                Authorization: 'Bearer' + accessToken
+            },
+            method: 'POST',
+            data: data,
+            statusCode: 
+            {
+                404: () => {console.error('resource not found');},
+                401: () => {console.error('not authorized to access resource');},
+                500: () => {console.error('error occured serverside');}
+            },
+            timeout: 5000
+        }
+        );
     }
 }

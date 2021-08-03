@@ -2,29 +2,19 @@
 	import { HttpClient } from './HttpClient';
 	import { AuthService } from './AuthService';
 	import type { IAuthService } from './AuthService';
+	import config from './config';
+	import Menu from './components/Menu.svelte';
 
-	const _authConfig = 
-	{
-		auth: {
-			clientId: '2e4365d1-29b8-4b39-a0a4-fedaa8cfc675',
-			redirectUri: 'http://localhost:5003',
-			authority: 'https://login.microsoftonline.com/3ea8a579-a1b4-4af9-b63e-7fdc82963153'
-		},
-		cache: {
-			cacheLocation: 'sessionStorage',
-			storeAuthStateInCookie: false
-		}
-	}
 	const _client : HttpClient = new HttpClient();
-	const _authService : IAuthService = new AuthService(_authConfig);
+	const _authService : IAuthService = new AuthService(config.auth);
 
 	async function graph() 
 	{
 		const token = await _authService.getToken(['user.read']).then(result => { return result.accessToken; });
 		const url = new URL('https://graph.microsoft.com/v1.0/me');
 		_client.getJSON(url, token)
-		.done(data => {console.log(data)})
-		.fail(error => {console.error(error)});
+		.done(data => { console.log(data) })
+		.fail(error => { console.error(error) });
 	}
 
 	async function api()
@@ -37,12 +27,21 @@
 	}
 </script>
 
+<Menu/>
+
 <main>
-	<p>User details: { async () => await _authService.getUser().then(user => { return JSON.stringify(user.account) }).catch(error => {return 'User not logged in';}) }</p>
-	<button on:click={ api }>Call API</button>
-	<button on:click={ graph }>Call Graph</button>
-	<button on:click={ async () => { await _authService.login(); } }>Login</button>
-	<button on:click={ async () => { await _authService.logout(); } }>Logout</button>
+	<div class="uk-section">
+		<p>User details: 
+			{ #await _authService.getUser()} <p>Waiting for user status...</p>
+			{ :then user } <p>{ JSON.stringify(user.account) }</p>
+			{ :catch error } <p>User not logged in</p>
+			{ /await }
+		</p>
+		<button on:click={ api }>Call API</button>
+		<button on:click={ graph }>Call Graph</button>
+		<button on:click={ async () => { await _authService.login(); } }>Login</button>
+		<button on:click={ async () => { await _authService.logout(); } }>Logout</button>
+	</div>
 </main>
 
 <style>

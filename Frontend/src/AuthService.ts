@@ -19,7 +19,7 @@ export class AuthService implements IAuthService
         this.client = new PublicClientApplication(config);
     }
 
-    getUser(): Promise<AuthenticationResult> 
+    getUser(): Promise<AuthenticationResult>
     {
         if(this.user == null) 
         {
@@ -67,11 +67,12 @@ export class AuthService implements IAuthService
 			scopes: scopes,
 			account: account
 		};
-		try {
+		try 
+        {
 			const response = await this.client.acquireTokenSilent(request);
 			return await new Promise<AuthenticationResult>((resolve,reject) => {
 				resolve(response);
-			});
+		});
 		} catch(error) {
 			return await this.client.acquireTokenPopup(request);
 		}
