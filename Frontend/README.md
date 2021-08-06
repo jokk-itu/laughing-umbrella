@@ -1,4 +1,4 @@
-#Frontend
+# Frontend
 
 Frontend written using Svelte and Typescript.
 There is login, logout and token capabilities with AzureAD.
