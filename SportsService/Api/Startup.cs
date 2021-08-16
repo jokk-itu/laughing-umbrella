@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using Prometheus;
+using Prometheus.SystemMetrics;
 
 namespace Api
 {
@@ -84,6 +86,7 @@ namespace Api
                         .AllowAnyMethod();
                 });
             });
+            services.AddSystemMetrics();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -96,11 +99,18 @@ namespace Api
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApi v1"));
 
             app.UseRouting();
+            app.UseHttpMetrics();
+            
             app.UseCors("default");
+            
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapMetrics();
+            });
         }
     }
 }
