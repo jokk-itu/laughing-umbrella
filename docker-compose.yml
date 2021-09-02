@@ -3,6 +3,7 @@ version: "3.8"
 networks:
   servicebus_net:
   service_net:
+  monitoring:
   databases:
     external: true
     name: databases_databases
@@ -103,11 +104,10 @@ services:
       - "9090:9090"
     container_name: "prometheus"
     volumes:
-      - ./Monitoring/prometheus.yml:/etc/prometheus/
+      - ./Monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      service_net:
-        aliases:
-          - prometheus       
+      - service_net
+      - monitoring
           
   grafana:
     image: grafana/grafana
@@ -115,9 +115,18 @@ services:
       - "3000:3000"
     container_name: "grafana"
     networks:
-      service_net:
-        aliases:
-          - grafana             
+      - monitoring      
+
+  docker_exporter:
+    image: prometheusnet/docker_exporter
+    container_name: docker_exporter
+    hostname: docker_exporter
+    ports:
+      - "9417:9417"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - monitoring  
           
   servicebus:
     image: nginx

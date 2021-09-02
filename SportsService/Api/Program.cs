@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -8,22 +9,21 @@ namespace Api
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            var seqUrl =
-                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!.Equals("Development")
-                    ? "http://localhost:5341"
-                    : "http://logger:5341";
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.Seq(seqUrl)
-                .CreateLogger();
-            var host = CreateHostBuilder(args).Build();
-            await host.RunAsync();
+            CreateHostBuilder(args).Build().Run();
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                .UseSerilog((builderContext, services, loggerConfig) =>
+                {
+                    loggerConfig.WriteTo.Seq(builderContext.Configuration["LOGGING:SEQURI"]);
+                    //TODO Enrich
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }
