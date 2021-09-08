@@ -97,10 +97,9 @@ services:
       context: ./NEO4J
       dockerfile: Dockerfile
     container_name: neo4j
+    hostname: neo4j
     networks:
-      databases:
-        aliases:
-          - neo4j
+      - databases
     volumes:
       - ./volumes/neo4j/data:/data
       - ./volumes/neo4j/logs:/logs
@@ -108,15 +107,14 @@ services:
       - ./volumes/neo4j/plugins:/plugins
     ports:
       - "7474:7474"
-      - "7687:7687"  
+      - "7687:7687"
       
   mongo:
     image: mongo:5.0.1-focal
     container_name: mongo
+    hostname: mongo
     networks:
-      databases:
-        aliases:
-          - mongo
+      - databases
     volumes:
       - ./volumes/mongo/data:/data/db
     ports:

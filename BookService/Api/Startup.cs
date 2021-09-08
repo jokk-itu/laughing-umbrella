@@ -1,13 +1,17 @@
-using System;
-using System.Linq;
 using Database;
+using Jokk.Microservice.Cors;
+using Jokk.Microservice.Log.Extensions;
+using Jokk.Microservice.Prometheus;
+using Jokk.Microservice.Swagger;
 using MediatorRequests;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using ObjectMapper;
@@ -25,10 +29,14 @@ namespace Api
         
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
+            
             services.AddAutoMapper(typeof(AutoMapperEntrypoint).Assembly);
             services.AddMediatR(typeof(MediatREntryPoint).Assembly);
-            
-            services.AddSingleton(new MongoClient(Configuration.GetConnectionString("Mongo")));
+
+            var connectionString = Configuration.GetConnectionString("Mongo");
+            services.AddSingleton(new MongoClient(connectionString));
             services.AddScoped(serviceProvider =>
             {
                 var client = (MongoClient) serviceProvider.GetService(typeof(MongoClient));
@@ -37,10 +45,13 @@ namespace Api
             services.AddScoped<MongoContext>();
             
             services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Api", Version = "v1" });
-            });
+            
+            services.AddMicroserviceLogging();
+            services.AddMicroservicePrometheus(Configuration.GetSection("Services"), mongodb: connectionString);
+            services.AddMicroserviceCors(
+                Configuration.GetSection("Services"), 
+                Configuration.GetSection("Methods"));
+            services.AddSwaggerAuthorization();
         }
         
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -49,14 +60,17 @@ namespace Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Api v1"));
 
+            app.UseHttpsRedirection();
+            app.UseMicroserviceSwagger();
+            app.UseMicroserviceLogging();
+            
             app.UseRouting();
 
             app.UseAuthorization();
-
+            app.UseAuthentication();
+            
+            app.UseMicroservicePrometheus();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

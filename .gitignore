@@ -7,3 +7,5 @@ mongo-repl.key
 .vscode
 build
 node_modules
+.pfx
+nuget.config

@@ -1,3 +1,7 @@
+using Jokk.Microservice.Log.Extensions;
+using Jokk.Microservice.Prometheus;
+using Jokk.Microservice.Cors;
+using Jokk.Microservice.Swagger;
 using MediatorRequests;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -7,7 +11,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
-using Microsoft.OpenApi.Models;
 using Neo4j.Driver;
 
 namespace Api
@@ -21,30 +24,34 @@ namespace Api
 
         private IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+
+            services.AddMicroserviceLogging();
+            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
 
             services.AddMediatR(typeof(ServiceEntrypoint).Assembly);
             services.AddAutoMapper(typeof(ObjectMapper.ServiceEntrypoint).Assembly);
 
-            var neo4j = Configuration.GetSection("Neo4j");
+            var neo4J = Configuration.GetSection("Neo4j");
             services.AddSingleton(_ => GraphDatabase.Driver(
-                neo4j.GetValue<string>("Uri"),
+                neo4J.GetValue<string>("Uri"),
                 AuthTokens.Basic(
-                    neo4j.GetValue<string>("Username"),
-                    neo4j.GetValue<string>("Password"))));
-
-            services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Api", Version = "v1" });
-            });
+                    neo4J.GetValue<string>("Username"),
+                    neo4J.GetValue<string>("Password"))));
+            
+            services.AddSwaggerAuthorization();
+            services.AddMicroservicePrometheus(Configuration.GetSection("Services"), neo4J: neo4J);
+            services.AddMicroserviceCors(
+                Configuration.GetSection("Services"), 
+                Configuration.GetSection("Methods"));
+                
+            services.AddHttpClient("");
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -52,14 +59,15 @@ namespace Api
                 app.UseDeveloperExceptionPage();
             }
             
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Api v1"));
+            app.UseMicroserviceLogging();
+            app.UseMicroserviceCors();
+            app.UseMicroserviceSwagger();
 
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseMicroservicePrometheus();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

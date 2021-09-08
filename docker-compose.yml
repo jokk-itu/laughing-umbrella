@@ -15,13 +15,16 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:80"
+      - "5001:443"
     depends_on:
       - servicebus
       - logger
+    environment:
+      - NUGET_API=${NUGET_API}
     container_name: sports_api
     hostname: sports_api
     networks:
-      - databases   
+      - databases
       - service_net
       
   food_api:
@@ -30,9 +33,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5002:80"
+      - "5003:443"
     depends_on:
       - servicebus
       - logger
+    environment:
+      - NUGET_API=${NUGET_API}
     container_name: food_api
     hostname: food_api
     networks:
@@ -45,9 +51,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5004:80"
+      - "5005:443"
     depends_on:
       - servicebus
       - logger
+    environment:
+      - NUGET_API=${NUGET_API}
     container_name: books_api
     hostname: books_api
     networks:
@@ -79,7 +88,7 @@ services:
       context: ./Frontend
       dockerfile: Dockerfile
     ports:
-      - "5003:5003"
+      - "5020:5020"
     depends_on:
       - sports_api
     container_name: client
@@ -93,16 +102,15 @@ services:
     environment:
       - ACCEPT_EULA=Y
     container_name: logger
+    hostname: logger
     networks:
-      service_net:
-        aliases:
-          - logger
+      - service_net
           
   prometheus:
     image: prom/prometheus
     ports:
       - "9090:9090"
-    container_name: "prometheus"
+    container_name: prometheus
     volumes:
       - ./Monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
@@ -113,20 +121,11 @@ services:
     image: grafana/grafana
     ports:
       - "3000:3000"
-    container_name: "grafana"
-    networks:
-      - monitoring      
-
-  docker_exporter:
-    image: prometheusnet/docker_exporter
-    container_name: docker_exporter
-    hostname: docker_exporter
-    ports:
-      - "9417:9417"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./Monitoring/grafana/:/var/lib/grafana
+    container_name: grafana
     networks:
-      - monitoring  
+      - monitoring 
           
   servicebus:
     image: nginx

@@ -16,21 +16,16 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 5s
     static_configs:
-    - targets: ['sports_api:5000']
+    - targets: ['sports_api:443']
 
   - job_name: 'book_api'
     metrics_path: '/metrics'
     scrape_interval: 5s
     static_configs:
-    - targets: ['books_api:5004']  
+    - targets: ['books_api:443']  
     
   - job_name: 'food_api'
     metrics_path: '/metrics'
     scrape_interval: 5s
     static_configs:
-    - targets: ['food_api:5002']  
-    
-  - job_name: 'my_docker_metrics'
-    static_configs:
-      - targets:
-        - hostname:9417  
+    - targets: ['food_api:443']    

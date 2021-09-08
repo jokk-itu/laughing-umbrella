@@ -1,10 +1,15 @@
 using System;
 using System.Linq;
 using Database;
+using Jokk.Microservice.Cors;
+using Jokk.Microservice.Log.Extensions;
+using Jokk.Microservice.Prometheus;
+using Jokk.Microservice.Swagger;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +17,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using Prometheus;
-using Prometheus.SystemMetrics;
 
 namespace Api
 {
@@ -48,45 +52,17 @@ namespace Api
 
             services.AddMediatR(typeof(Mediator.ServiceEntrypoint).Assembly);
 
+            var connectionString = Configuration.GetConnectionString("sqlServer");
             services.AddDbContext<SportsContext>(
-                options => options.UseSqlServer(Configuration.GetConnectionString("default"),
+                options => options.UseSqlServer(connectionString,
                     b => b.MigrationsAssembly("Api")));
 
             services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "WebApi", Version = "v1"});
-                var securitySchema = new OpenApiSecurityScheme
-                {
-                    Description =
-                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                };
-                c.AddSecurityDefinition("Bearer", securitySchema);
-                var securityRequirement = new OpenApiSecurityRequirement
-                {
-                    {securitySchema, new[] {"Bearer"}}
-                };
-                c.AddSecurityRequirement(securityRequirement);
-            });
-            services.AddCors(options =>
-            {
-                options.AddPolicy("default", policy =>
-                {
-                    policy.WithOrigins("http://localhost:5003", "https://localhost:5003")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
-            });
-            services.AddSystemMetrics();
+
+            services.AddMicroserviceCors(Configuration.GetSection("Services"), Configuration.GetSection("Methods"));
+            services.AddMicroserviceLogging();
+            services.AddMicroservicePrometheus(Configuration.GetSection("Services"), sqlserver: connectionString);
+            services.AddSwaggerAuthorization();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -95,22 +71,20 @@ namespace Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApi v1"));
+
+            app.UseMicroserviceSwagger();
+            app.UseMicroserviceLogging();
+            app.UseMicroserviceCors();
 
             app.UseRouting();
-            app.UseHttpMetrics();
-            
-            app.UseCors("default");
-            
+
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseMicroservicePrometheus();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapMetrics();
             });
         }
     }

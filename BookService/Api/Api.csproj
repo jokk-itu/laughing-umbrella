@@ -6,7 +6,13 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="Jokk.Microservice.Cors" Version="1.0.2" />
+    <PackageReference Include="Jokk.Microservice.Log" Version="1.0.3" />
+    <PackageReference Include="Jokk.Microservice.Prometheus" Version="1.0.2" />
+    <PackageReference Include="Jokk.Microservice.Swagger" Version="1.0.2" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.16.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.13.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
   </ItemGroup>
@@ -16,5 +22,9 @@
     <ProjectReference Include="..\MediatorRequests\MediatorRequests.csproj" />
     <ProjectReference Include="..\ObjectMapper\ObjectMapper.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+        <Content Include="localhost.pfx" Link="localhost.pfx" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
 
 </Project>
