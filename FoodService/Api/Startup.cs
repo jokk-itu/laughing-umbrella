@@ -1,3 +1,4 @@
+using System.Linq;
 using Jokk.Microservice.Log.Extensions;
 using Jokk.Microservice.Prometheus;
 using Jokk.Microservice.Cors;
@@ -29,7 +30,7 @@ namespace Api
             services.AddControllers();
 
             services.AddMicroserviceLogging();
-            
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
 
@@ -42,14 +43,18 @@ namespace Api
                 AuthTokens.Basic(
                     neo4J.GetValue<string>("Username"),
                     neo4J.GetValue<string>("Password"))));
-            
+
             services.AddSwaggerAuthorization();
-            services.AddMicroservicePrometheus(Configuration.GetSection("Services"), neo4J: neo4J);
+            services.AddMicroservicePrometheus(new PrometheusConfiguration()
+            {
+                Neo4JDatabase = neo4J["Database"],
+                Neo4JConnectionString = neo4J["Uri"],
+                Services = Configuration.GetSection("Services").GetChildren()
+                    .ToDictionary(section => section.Key, section => section.Value)
+            });
             services.AddMicroserviceCors(
-                Configuration.GetSection("Services"), 
+                Configuration.GetSection("Services"),
                 Configuration.GetSection("Methods"));
-                
-            services.AddHttpClient("");
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -58,20 +63,18 @@ namespace Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.UseMicroserviceLogging();
             app.UseMicroserviceCors();
             app.UseMicroserviceSwagger();
 
             app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseMicroservicePrometheus();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

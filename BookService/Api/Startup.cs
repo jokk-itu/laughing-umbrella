@@ -1,3 +1,4 @@
+using System.Linq;
 using Database;
 using Jokk.Microservice.Cors;
 using Jokk.Microservice.Log.Extensions;
@@ -12,7 +13,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
-using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using ObjectMapper;
 
@@ -29,25 +29,30 @@ namespace Api
         
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
             
             services.AddAutoMapper(typeof(AutoMapperEntrypoint).Assembly);
             services.AddMediatR(typeof(MediatREntryPoint).Assembly);
-
-            var connectionString = Configuration.GetConnectionString("Mongo");
-            services.AddSingleton(new MongoClient(connectionString));
+            
+            services.AddSingleton(new MongoClient(Configuration["Mongo:Uri"]));
             services.AddScoped(serviceProvider =>
             {
                 var client = (MongoClient) serviceProvider.GetService(typeof(MongoClient));
                 return client!.GetDatabase(Configuration.GetSection("Mongo:Database").Value);
             });
             services.AddScoped<MongoContext>();
-            
-            services.AddControllers();
-            
+
             services.AddMicroserviceLogging();
-            services.AddMicroservicePrometheus(Configuration.GetSection("Services"), mongodb: connectionString);
+            services.AddMicroservicePrometheus(new PrometheusConfiguration()
+            {
+                MongoDatabase = Configuration["Mongo:Database"],
+                MongoConnectionString = Configuration["Mongo:Uri"],
+                Services = Configuration.GetSection("Services").GetChildren()
+                    .ToDictionary(section => section.Key, section => section.Value)
+            });
             services.AddMicroserviceCors(
                 Configuration.GetSection("Services"), 
                 Configuration.GetSection("Methods"));
@@ -61,7 +66,7 @@ namespace Api
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            app.UseMicroserviceCors();
             app.UseMicroserviceSwagger();
             app.UseMicroserviceLogging();
             

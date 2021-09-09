@@ -15,7 +15,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:80"
-      - "5001:443"
     depends_on:
       - servicebus
       - logger
@@ -33,7 +32,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5002:80"
-      - "5003:443"
     depends_on:
       - servicebus
       - logger
@@ -51,7 +49,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5004:80"
-      - "5005:443"
     depends_on:
       - servicebus
       - logger

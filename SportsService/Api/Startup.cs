@@ -33,6 +33,8 @@ namespace Api
         {
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
+            
+            services.AddControllers();
 
             services.AddAuthorization(options =>
             {
@@ -57,11 +59,14 @@ namespace Api
                 options => options.UseSqlServer(connectionString,
                     b => b.MigrationsAssembly("Api")));
 
-            services.AddControllers();
-
             services.AddMicroserviceCors(Configuration.GetSection("Services"), Configuration.GetSection("Methods"));
             services.AddMicroserviceLogging();
-            services.AddMicroservicePrometheus(Configuration.GetSection("Services"), sqlserver: connectionString);
+            services.AddMicroservicePrometheus(new PrometheusConfiguration()
+            {
+                SqlServerConnectionString = Configuration.GetConnectionString("SqlServer"),
+                Services = Configuration.GetSection("Services").GetChildren()
+                    .ToDictionary(section => section.Key, section => section.Value)
+            });
             services.AddSwaggerAuthorization();
         }
 
