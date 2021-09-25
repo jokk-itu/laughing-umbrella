@@ -3,7 +3,9 @@ using GreenPipes;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Send.Observers;
+using Serilog;
 
 namespace Send
 {
@@ -37,13 +39,19 @@ namespace Send
                                 hostConfigurator.Username(hostContext.Configuration["ServiceBus:Username"]);
                                 hostConfigurator.Password(hostContext.Configuration["ServiceBus:Password"]);
                             });
-                            factoryConfigurator.ConnectSendObserver(new SendObserver());
+                            factoryConfigurator.ConnectSendObserver(new SendObserver(busContext.GetService<ILogger<SendObserver>>()));
                         });
                     });
                     services.AddHostedService<Worker>();
                 })
                 .ConfigureAppConfiguration((hostContext, appContext) =>
                 {
+                }).UseSerilog((context, services, config) =>
+                {
+                    config
+                        .WriteTo.Console()
+                        .Enrich.FromLogContext()
+                        .MinimumLevel.Debug();
                 });
     }
 }

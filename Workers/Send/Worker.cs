@@ -33,12 +33,21 @@ namespace Send
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
-            {
+            //while (!stoppingToken.IsCancellationRequested)
+           // {
                 var endpoint = await _busControl.GetSendEndpoint(new Uri("exchange:account-service"));
+                //var correlationId = Guid.NewGuid();
                 var correlationId = Guid.NewGuid();
                 var id = new Random().Next(1, 10000);
-                Console.WriteLine($"Sent message: {id}, {correlationId}");
+            
+                await endpoint.Send<IAccountUpdateStart>(new
+                {
+                    __CorrelationId = correlationId,
+                    AccountId = id
+                }, stoppingToken);
+                Console.WriteLine($"Sent AccountUpdateStart: {id}, {correlationId}");
+                
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
                 await endpoint.Send<IAccountUpdate>(new
                 {
                     __CorrelationId = correlationId,
@@ -47,9 +56,19 @@ namespace Send
                     Age = new Random().Next(18,99),
                     Gender = new Random().Next(0,1)
                 }, stoppingToken);
+                Console.WriteLine($"Sent AccountUpdate: {id}, {correlationId}");
+                
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                await endpoint.Send<IAccountUpdateComplete>(new
+                {
+                    __CorrelationId = correlationId,
+                    AccountId = id
+                }, stoppingToken);
+                Console.WriteLine($"Sent AccountUpdateComplete: {id}, {correlationId}");
+                
                 
                 await Task.Delay(1000, stoppingToken);
-            }
+            //}
         }
     }
 }

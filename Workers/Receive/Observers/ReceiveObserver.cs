@@ -1,34 +1,42 @@
 using System;
 using System.Threading.Tasks;
 using MassTransit;
+using Microsoft.Extensions.Logging;
 
 namespace Receive.Observers
 {
     public class ReceiveObserver : IReceiveObserver
     {
+        private readonly ILogger<ReceiveObserver> _logger;
+
+        public ReceiveObserver(ILogger<ReceiveObserver> logger)
+        {
+            _logger = logger;
+        }
+        
         public async Task PreReceive(ReceiveContext context)
         {
-            throw new NotImplementedException();
+            _logger.LogDebug("PreReceive");
         }
 
         public async Task PostReceive(ReceiveContext context)
         {
-            throw new NotImplementedException();
+            _logger.LogDebug("PostReceive");
         }
 
         public async Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
         {
-            throw new NotImplementedException();
+            _logger.LogDebug("PostConsume");
         }
 
         public async Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) where T : class
         {
-            throw new NotImplementedException();
+            _logger.LogDebug("Oh no ConsumeFault");
         }
 
         public async Task ReceiveFault(ReceiveContext context, Exception exception)
         {
-            throw new NotImplementedException();
+            _logger.LogDebug("Oh no receive fault");
         }
     }
 }

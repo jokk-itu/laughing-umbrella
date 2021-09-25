@@ -122,15 +122,15 @@ services:
       - monitoring 
           
   servicebus:
-    image: 3.9-management
+    image: rabbitmq:3.9-management
     hostname: servicebus
     container_name: servicebus
     ports:
       - "5670:5672"
       - "15672:15672"
     volumes:
-      - ./Servicebus/enabled_plugins:/etc/rabbitmq/enabled_plugins
-      - ./Servicebus/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - "./Servicebus/enabled_plugins:/etc/rabbitmq/enabled_plugins"
+      - "./Servicebus/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf"
     networks:
       - service_net
       
