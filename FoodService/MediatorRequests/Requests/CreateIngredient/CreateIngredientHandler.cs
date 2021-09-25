@@ -23,8 +23,7 @@ namespace MediatorRequests.Requests.CreateIngredient
             var session = _driver.AsyncSession();
             var ingredient = await session.WriteTransactionAsync(async transaction =>
             {
-                const string cypher =
-                    @"
+                const string cypher = @"
 CREATE (i:Ingredient {name: $name, supplier: $supplier}) 
 RETURN id(i) AS id, i.name AS name, i.supplier as supplier";
                 var result = await transaction.RunAsync(cypher, 

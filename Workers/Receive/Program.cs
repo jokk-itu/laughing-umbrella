@@ -1,9 +1,11 @@
 using System;
 using GreenPipes;
 using MassTransit;
+using MassTransit.Definition;
 using MassTransit.Pipeline.Observables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Receive.Filters;
 using Receive.Observers;
 
 namespace Receive
@@ -23,6 +25,7 @@ namespace Receive
                     {
                         configurator.UsingRabbitMq((busContext, factoryConfigurator) =>
                         {
+                            
                             factoryConfigurator.UseRetry(retryConfigurator =>
                             {
                                 retryConfigurator.Incremental(5,TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
@@ -31,11 +34,12 @@ namespace Receive
                             {
                                 retryConfigurator.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30));
                             });
-                            var hostname = hostContext.Configuration.GetSection("ServiceBus:Hostname").Value;
-                            factoryConfigurator.Host($"rabbitmq://{hostname}:5670", hostConfigurator =>
+                            var hostname = hostContext.Configuration["ServiceBus:Hostname"];
+                            var port = hostContext.Configuration["ServiceBus:Port"];
+                            factoryConfigurator.Host($"rabbitmq://{hostname}:{port}", hostConfigurator =>
                             {
-                                hostConfigurator.Username(hostContext.Configuration.GetSection("ServiceBus:Username").Value);
-                                hostConfigurator.Password(hostContext.Configuration.GetSection("ServiceBus:Password").Value);
+                                hostConfigurator.Username(hostContext.Configuration["ServiceBus:Username"]);
+                                hostConfigurator.Password(hostContext.Configuration["ServiceBus:Password"]);
                             });
                             factoryConfigurator.ConnectConsumeObserver(new ConsumeObserver());
                             factoryConfigurator.ConnectReceiveObserver(new ReceiveObserver());
@@ -46,7 +50,7 @@ namespace Receive
                                 endpointConfigurator.Consumer<AccountConsumer>();
                                 endpointConfigurator.Durable = false;
                                 endpointConfigurator.PrefetchCount = 100;
-                                endpointConfigurator.UseInMemoryOutbox();
+                                endpointConfigurator.UseFilter(new ConsumeFilter());
                             });
                         });
                     });

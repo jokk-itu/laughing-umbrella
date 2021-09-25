@@ -49,7 +49,9 @@ namespace Api
             services.AddMicroservicePrometheus(new PrometheusConfiguration()
             {
                 MongoDatabase = Configuration["Mongo:Database"],
-                MongoConnectionString = Configuration["Mongo:Uri"],
+                MongoUri = Configuration["Mongo:Uri"],
+                MongoUsername = Configuration["Mongo:Username"],
+                MongoPassword = Configuration["Mongo:Password"],
                 Services = Configuration.GetSection("Services").GetChildren()
                     .ToDictionary(section => section.Key, section => section.Value)
             });

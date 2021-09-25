@@ -21,8 +21,7 @@ namespace Send
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
-            var timeoutCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            await _busControl.StartAsync(timeoutCancellationTokenSource.Token);
+            await _busControl.StartAsync(cancellationToken);
             await base.StartAsync(cancellationToken);
         }
 
@@ -44,7 +43,7 @@ namespace Send
                 {
                     __CorrelationId = correlationId,
                     AccountId = id,
-                    Name = "Jerry Kruger",
+                    Name = "John Doe",
                     Age = new Random().Next(18,99),
                     Gender = new Random().Next(0,1)
                 }, stoppingToken);

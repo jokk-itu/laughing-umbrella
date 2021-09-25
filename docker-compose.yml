@@ -1,12 +1,9 @@
 version: "3.8"
 
 networks:
-  servicebus_net:
   service_net:
   monitoring:
   databases:
-    external: true
-    name: databases_databases
 
 services:
   sports_api:
@@ -62,8 +59,8 @@ services:
   
   send_worker:
     build:
-      context: ./Workers/Send
-      dockerfile: Dockerfile 
+      context: ./Workers
+      dockerfile: ./Send/Dockerfile 
     depends_on:
       - servicebus
     container_name: send_worker
@@ -72,8 +69,8 @@ services:
       
   receive_worker:
     build:
-      context: ./Workers/Receive
-      dockerfile: Dockerfile
+      context: ./Workers
+      dockerfile: ./Receive/Dockerfile
     depends_on:
       - servicebus
     container_name: receive_worker
@@ -125,62 +122,73 @@ services:
       - monitoring 
           
   servicebus:
-    image: nginx
+    image: 3.9-management
     hostname: servicebus
-    container_name: servicebus_loadbalancer
+    container_name: servicebus
     ports:
-      - "5670:80"
+      - "5670:5672"
+      - "15672:15672"
     volumes:
-      - ./Servicebus/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - servicebus_node_1
-      - servicebus_node_2
-      - servicebus_node_3  
+      - ./Servicebus/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./Servicebus/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     networks:
-      service_net:
-        aliases:
-          - servicebus
-      servicebus_net:
-          
-  servicebus_node_1:
-    image: rabbitmq:3.9
-    command: bash -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
-    container_name: servicebus_node_1
-    hostname: servicebus_node_1
-    volumes:
-      - ./Servicebus/Node1/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./Servicebus/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
-    networks:
-      servicebus_net:
-        aliases:
-          - servicebus_node_1
-  
-  servicebus_node_2:
-    image: rabbitmq:3.9
-    command: bash -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
-    depends_on:
-      - servicebus_node_1
-    hostname: servicebus_node_2
-    container_name: servicebus_node_2
-    volumes:
-      - ./Servicebus/Node2/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./Servicebus/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
-    networks:
-      servicebus_net:
-        aliases:
-          - servicebus_node_2
+      - service_net
       
-  servicebus_node_3:
-    image: rabbitmq:3.9
-    command: bash -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
-    depends_on:
-      - servicebus_node_1
-    hostname: servicebus_node_3
-    container_name: servicebus_node_3
-    volumes:
-      - ./Servicebus/Node3/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./Servicebus/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+  neo4j:
+    build:
+      context: ./Neo4j
+      dockerfile: Dockerfile
+    container_name: neo4j
+    hostname: neo4j
     networks:
-      servicebus_net:    
-        aliases:
-          - servicebus_node_3
+      - databases
+    volumes:
+      - ./Neo4j/data:/data
+      - ./Neo4j/logs:/logs
+      - ./Neo4j/import:/var/lib/neo4j/import
+      - ./Neo4j/plugins:/plugins
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+      
+  mongo:
+    image: mongo:5.0.1-focal
+    container_name: mongo
+    hostname: mongo
+    networks:
+      - databases
+    volumes:
+      - ./Mongo/data:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: test
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin  
+      
+  redis:
+    image: redis:6.2.5-alpine
+    container_name: redis
+    hostname: redis
+    networks:
+      - databases
+    ports:
+      - "6379:6379"
+    volumes:
+     - "./Redis/redis.conf:/usr/local/etc/redis/redis.conf"
+     
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    hostname: mssql
+    container_name: mssql
+    environment:
+      -  ACCEPT_EULA=Y
+      -  SA_PASSWORD=Password12!
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./MSSQL/primary/data:/var/opt/mssql/data
+      - ./MSSQL/primary/log:/var/opt/mssql/log
+      - ./MSSQL/primary/secrets:/var/opt/mssql/secrets
+    networks:
+      - databases  

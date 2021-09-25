@@ -9,7 +9,8 @@ namespace Receive
     {
         public async Task Consume(ConsumeContext<IAccountUpdate> context)
         {
-            await Task.Run(() => Console.WriteLine($"Received the following id: {context.Message.AccountId}, CorrelationId: {context.CorrelationId}"));
+            await Task.Run(() => Console.WriteLine(
+                $"Received the following id: {context.Message.AccountId}, CorrelationId: {context.CorrelationId}"));
         }
     }
 }

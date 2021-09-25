@@ -3,6 +3,7 @@ using Jokk.Microservice.Log.Extensions;
 using Jokk.Microservice.Prometheus;
 using Jokk.Microservice.Cors;
 using Jokk.Microservice.Swagger;
+using Jokk.Microservice.Cache;
 using MediatorRequests;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,9 +29,13 @@ namespace Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
+            
+            //services.AddMicroserviceRateLimiting(Configuration.GetSection("RateLimit"));
+            
             services.AddMicroserviceLogging();
 
+            services.AddCacheStore();
+            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
 
@@ -48,7 +53,7 @@ namespace Api
             services.AddMicroservicePrometheus(new PrometheusConfiguration()
             {
                 Neo4JDatabase = neo4J["Database"],
-                Neo4JConnectionString = neo4J["Uri"],
+                Neo4JUri = neo4J["Uri"],
                 Services = Configuration.GetSection("Services").GetChildren()
                     .ToDictionary(section => section.Key, section => section.Value)
             });
@@ -63,10 +68,12 @@ namespace Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
+            //app.UseMicroserviceRateLimiting();
             app.UseMicroserviceLogging();
             app.UseMicroserviceCors();
             app.UseMicroserviceSwagger();
+            app.UseCacheStore();
 
             app.UseRouting();
 

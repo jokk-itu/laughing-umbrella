@@ -16,16 +16,16 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 5s
     static_configs:
-    - targets: ['sports_api:443']
+    - targets: ['sports_api:80']
 
   - job_name: 'book_api'
     metrics_path: '/metrics'
     scrape_interval: 5s
     static_configs:
-    - targets: ['books_api:443']  
+    - targets: ['books_api:80']  
     
   - job_name: 'food_api'
     metrics_path: '/metrics'
     scrape_interval: 5s
     static_configs:
-    - targets: ['food_api:443']    
+    - targets: ['food_api:80']    

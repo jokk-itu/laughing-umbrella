@@ -20,8 +20,7 @@ namespace Receive
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
-            var timeoutCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            await _busControl.StartAsync(timeoutCancellationTokenSource.Token);
+            await _busControl.StartAsync(cancellationToken);
             await base.StartAsync(cancellationToken);
         }
 
