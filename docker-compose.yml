@@ -10,13 +10,13 @@ services:
     build:
       context: ./SportsService
       dockerfile: Dockerfile
+      args:
+        - NUGET_API=${NUGET_API}
     ports:
       - "5000:80"
     depends_on:
       - servicebus
       - logger
-    environment:
-      - NUGET_API=${NUGET_API}
     container_name: sports_api
     hostname: sports_api
     networks:
@@ -27,13 +27,13 @@ services:
     build:
       context: ./FoodService
       dockerfile: Dockerfile
+      args:
+        - NUGET_API=${NUGET_API}
     ports:
       - "5002:80"
     depends_on:
       - servicebus
       - logger
-    environment:
-      - NUGET_API=${NUGET_API}
     container_name: food_api
     hostname: food_api
     networks:
@@ -44,13 +44,13 @@ services:
     build:
       context: ./BookService
       dockerfile: Dockerfile
+      args:
+        - NUGET_API=${NUGET_API}
     ports:
       - "5004:80"
     depends_on:
       - servicebus
       - logger
-    environment:
-      - NUGET_API=${NUGET_API}
     container_name: books_api
     hostname: books_api
     networks:

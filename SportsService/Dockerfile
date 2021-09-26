@@ -2,6 +2,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0.301-buster-slim-amd64 AS build
 WORKDIR /app
 COPY . .
+ARG NUGET_API
+ENV NUGET_API=$NUGET_API
 RUN dotnet restore
 RUN dotnet publish -c Release -o out --no-restore
 
