@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
-using Contracts.Ingredient.Responses;
 using Database;
 using FoodService.Contracts.Ingredient.Requests;
+using FoodService.Contracts.Ingredient.Responses;
 using MediatorRequests.CreateIngredient;
 using MediatorRequests.GetIngredient;
 using MediatorRequests.GetIngredients;
@@ -31,9 +32,9 @@ namespace Api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetIngredientsAsync()
+        public async Task<IActionResult> GetIngredientsAsync(CancellationToken cancellationToken = default)
         {
-            var ingredients = await _mediator.Send(new GetIngredientsQuery());
+            var ingredients = await _mediator.Send(new GetIngredientsQuery(), cancellationToken);
             
             if (ingredients is null)
                 return NotFound();
@@ -46,9 +47,9 @@ namespace Api.Controllers
         [Route("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetIngredientAsync([FromRoute] int id)
+        public async Task<IActionResult> GetIngredientAsync([FromRoute] int id, CancellationToken cancellationToken = default)
         {
-            var ingredient = await _mediator.Send(new GetIngredientQuery(id));
+            var ingredient = await _mediator.Send(new GetIngredientQuery(id), cancellationToken);
 
             if (ingredient is null)
                 return NotFound();
@@ -59,20 +60,20 @@ namespace Api.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> PostIngredientAsync([FromBody] PostIngredientRequest request)
+        public async Task<IActionResult> PostIngredientAsync([FromBody] PostIngredientRequest request, CancellationToken cancellationToken = default)
         {
-            var ingredient = await _mediator.Send(_mapper.Map<CreateIngredientCommand>(request));
+            var ingredient = await _mediator.Send(_mapper.Map<CreateIngredientCommand>(request), cancellationToken);
             var response = _mapper.Map<PostIngredientResponse>(ingredient);
-            return Created(new Uri($"http://localhost:5002/ingredients/{response.Id}"), response);
+            return Created(new Uri($"http://localhost:5002/ingredient/{response.Id}"), response);
         }
 
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutIngredientAsync([FromBody] PutIngredientRequest request)
+        public async Task<IActionResult> PutIngredientAsync([FromBody] PutIngredientRequest request, CancellationToken cancellationToken = default)
         {
             var command = _mapper.Map<UpdateIngredientCommand>(request);
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
             return result switch {
                 StatusResult.Success => NoContent(),
                 StatusResult.NotFound => NotFound(),

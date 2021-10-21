@@ -1,4 +1,4 @@
-namespace Contracts.Ingredient.Responses
+namespace FoodService.Contracts.Ingredient.Responses
 {
     public record GetIngredientResponse
     {
@@ -6,8 +6,6 @@ namespace Contracts.Ingredient.Responses
         
         public string Name { get; init; }
         
-        public string Supplier { get; init; }
-
-        public GetIngredientResponse() {}
+        public int Weight { get; init; }
     }
 }

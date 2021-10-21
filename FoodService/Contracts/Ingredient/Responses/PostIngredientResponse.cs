@@ -1,4 +1,4 @@
-namespace Contracts.Ingredient.Responses
+namespace FoodService.Contracts.Ingredient.Responses
 {
     public record PostIngredientResponse
     {

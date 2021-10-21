@@ -1,7 +1,9 @@
 namespace Database.Entities.Nodes
 {
-    public class Supplier
+    public record Supplier
     {
+        public int Id { get; set; }
         
+        public string  Name { get; set; }
     }
 }

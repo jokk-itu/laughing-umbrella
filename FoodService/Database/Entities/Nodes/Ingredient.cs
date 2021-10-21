@@ -6,8 +6,6 @@ namespace Database.Entities.Nodes
         
         public string Name { get; init; }
         
-        public string Supplier { get; init; }
-
-        public Ingredient() {}
+        public int Weight { get; init; }
     }
 }

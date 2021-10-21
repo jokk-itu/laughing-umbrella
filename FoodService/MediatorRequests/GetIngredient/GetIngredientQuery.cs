@@ -1,7 +1,7 @@
 using Database.Entities.Nodes;
 using MediatR;
 
-namespace MediatorRequests.Requests.GetIngredient
+namespace MediatorRequests.GetIngredient
 {
     public record GetIngredientQuery(int Id) : IRequest<Ingredient>;
 }

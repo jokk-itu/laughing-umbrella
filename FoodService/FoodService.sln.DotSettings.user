@@ -2,5 +2,6 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=4505ae42_002De349_002D4939_002D9112_002D092498f2ec4d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="DishControllerTest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;xUnit::86948544-BBB6-4639-B973-91EFEDBEDB6E::net5.0::Api.Test.DishControllerTest&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::EBFF0534-F2AC-4706-B26E-194BD9577AAE::net5.0::MediatorRequests.Test.CreateDishTest.Handle_GivenValid_ExpectDish&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

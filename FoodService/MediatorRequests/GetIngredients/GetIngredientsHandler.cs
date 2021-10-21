@@ -6,7 +6,7 @@ using Database.Entities.Nodes;
 using MediatR;
 using Neo4j.Driver;
 
-namespace MediatorRequests.Requests.GetIngredients
+namespace MediatorRequests.GetIngredients
 {
     public class GetIngredientsHandler : IRequestHandler<GetIngredientsQuery, ICollection<Ingredient>>
     {
@@ -24,11 +24,12 @@ namespace MediatorRequests.Requests.GetIngredients
             await using var session = _driver.AsyncSession();
             var ingredients = await session.ReadTransactionAsync(async transaction =>
             {
-                const string cypher = @"MATCH (i:Ingredient) RETURN id(i) AS id, i.name AS name, i.supplier AS supplier";
+                const string cypher = @"MATCH (i:Ingredient) RETURN id(i) AS id, i.name AS name, i.weight AS weight";
                 var result = await transaction.RunAsync(cypher);
-                if(await result.FetchAsync())
-                    return await result.ToListAsync(record => _mapper.Map<Ingredient>(record));
-                return null;
+                if (await result.PeekAsync() is null)
+                    return null;
+                
+                return await result.ToListAsync(record => _mapper.Map<Ingredient>(record));
             });
             return ingredients;
         }

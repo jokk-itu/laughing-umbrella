@@ -9,3 +9,7 @@ build
 node_modules
 *.pfx
 nuget.config
+/Neo4j/data
+/Neo4j/import
+/Neo4j/logs
+/Neo4j/plugins

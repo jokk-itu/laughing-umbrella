@@ -1,15 +1,42 @@
-CREATE (d:Dish {name: 'Banankage', price: 30})
+begin
+CREATE (:Dish {name: 'Banankage', price: 30})
+CREATE (:Dish {name: 'Jordbærkage', price: 50})
+CREATE (:Dish {name: 'Chokoladekage', price: 30})
+CREATE (:Dish {name: 'Spaghetti Bolognese', price: 30})
 
-CREATE (i:Ingredient {name: 'Banan', supplier: 'Rema 1000'}), (i:Ingredient {name: 'Chokolade', supplier: 'Rema 1000'})
+CREATE (:Supplier {name: 'Rema1000'})
+CREATE (:Supplier {name: 'Netto'})
+CREATE (:Supplier {name: 'Fakta'})
+CREATE (:Supplier {name: 'Føtex'})
+CREATE (:Supplier {name: 'Bilka'})
 
-MATCH 
-	(d:Dish), 
-	(i:Ingredient) 
+CREATE (:Ingredient {name: 'Banan', weight: 5})
+CREATE (:Ingredient {name: 'Chokolade', weight: 100})
+CREATE (:Ingredient {name: 'Spaghetti', weight: 500})
+commit
+
+begin
+MATCH (s:Supplier), (i:Ingredient)
+WHERE s.name = 'Rema1000'
+AND i.name = 'Spaghetti'
+CREATE (i)-[r:LocatedAt]->(s)
+commit
+
+begin
+MATCH (s:Supplier), (i:Ingredient)
+WHERE s.name = 'Rema1000'
+AND i.name = 'Banan'
+CREATE (i)-[r:LocatedAt]->(s)
+commit
+
+begin
+MATCH (d:Dish), (i:Ingredient) 
 WHERE d.name = 'Banankage' AND i.name = 'Banan'
-CREATE (d)-[r:IngredientInDish {iname: 'Banan', dname: 'Banankage', quantity: '100', unit: 'gram'}]->(i)
+CREATE (d)-[r:FoundIn {quantity: '100', unit: 'gram'}]->(i)
+commit
 
-MATCH 
-	(d:Dish), 
-	(i:Ingredient) 
+begin
+MATCH (d:Dish), (i:Ingredient) 
 WHERE d.name = 'Banankage' AND i.name = 'Chokolade'
-CREATE (d)-[r:IngredientInDish {iname: 'Chokolade', dname: 'Banankage', quantity: '100', unit: 'gram'}]->(i)
+CREATE (d)-[r:FoundIn {quantity: '100', unit: 'gram'}]->(i)
+commit

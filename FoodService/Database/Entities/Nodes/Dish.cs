@@ -7,7 +7,5 @@ namespace Database.Entities.Nodes
         public string Name { get; init; }
         
         public int Price { get; init; }
-
-        public Dish() {}
     }
 }
