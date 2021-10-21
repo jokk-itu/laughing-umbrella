@@ -8,7 +8,5 @@ namespace MediatorRequests.Requests.CreateIngredient
         public string Name { get; init; }
         
         public string Supplier { get; init; }
-
-        public CreateIngredientCommand() {}
     }
 }
