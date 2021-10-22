@@ -3,5 +3,6 @@
   &lt;TestAncestor&gt;
     &lt;TestId&gt;xUnit::86948544-BBB6-4639-B973-91EFEDBEDB6E::net5.0::Api.Test.DishControllerTest&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::EBFF0534-F2AC-4706-B26E-194BD9577AAE::net5.0::MediatorRequests.Test.CreateDishTest.Handle_GivenValid_ExpectDish&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::EBFF0534-F2AC-4706-B26E-194BD9577AAE::net5.0::MediatorRequests.Test.CreateDishTest&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

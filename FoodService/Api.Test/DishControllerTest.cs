@@ -24,7 +24,7 @@ namespace Api.Test
             _fakeMapper = new Mock<IMapper>();
         }
 
-        [Trait("Category", "Integration")]
+        [Trait("Category", "Unit")]
         [Fact]
         public async Task PostDishAsync_GivenValid_ExpectCreated()
         {

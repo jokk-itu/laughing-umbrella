@@ -15,8 +15,18 @@ services:
     ports:
       - "5000:80"
     depends_on:
-      - servicebus
+      - eventbus
       - logger
+      - prometheus
+      - mssql
+      - cache
+    env_file:
+      - ./EnvironmentFiles/logging.env
+      - ./EnvironmentFiles/mssql.env
+      - ./EnvironmentFiles/azuread.env
+      - ./EnvironmentFiles/cache.env
+      - ./EnvironmentFiles/ratelimit.env
+      - ./EnvironmentFiles/sportsapi.env
     container_name: sports_api
     hostname: sports_api
     networks:
@@ -32,8 +42,18 @@ services:
     ports:
       - "5002:80"
     depends_on:
-      - servicebus
+      - eventbus
       - logger
+      - neo4j
+      - cache
+      - prometheus
+    env_file:
+      - ./EnvironmentFiles/logging.env
+      - ./EnvironmentFiles/neo4j.env
+      - ./EnvironmentFiles/azuread.env
+      - ./EnvironmentFiles/cache.env
+      - ./EnvironmentFiles/ratelimit.env  
+      - ./EnvironmentFiles/foodapi.env
     container_name: food_api
     hostname: food_api
     networks:
@@ -49,8 +69,18 @@ services:
     ports:
       - "5004:80"
     depends_on:
-      - servicebus
+      - eventbus
       - logger
+      - mongo
+      - prometheus
+      - cache
+    env_file:
+      - ./EnvironmentFiles/logging.env
+      - ./EnvironmentFiles/mongo.env
+      - ./EnvironmentFiles/azuread.env
+      - ./EnvironmentFiles/cache.env
+      - ./EnvironmentFiles/ratelimit.env  
+      - ./EnvironmentFiles/booksapi.env
     container_name: books_api
     hostname: books_api
     networks:
@@ -62,7 +92,9 @@ services:
       context: ./Workers
       dockerfile: ./Send/Dockerfile 
     depends_on:
-      - servicebus
+      - eventbus
+    env_file:
+      - ./EnvironmentFiles/eventbus.env   
     container_name: send_worker
     networks:
       - service_net
@@ -72,7 +104,10 @@ services:
       context: ./Workers
       dockerfile: ./Receive/Dockerfile
     depends_on:
-      - servicebus
+      - eventbus
+      - statemachine
+    env_file:
+      - ./EnvironmentFiles/eventbus.env  
     container_name: receive_worker
     networks:
       - service_net                    
@@ -85,6 +120,8 @@ services:
       - "5020:5020"
     depends_on:
       - sports_api
+      - food_api
+      - books_api
     container_name: client
     networks:
       - service_net   
@@ -121,16 +158,16 @@ services:
     networks:
       - monitoring 
           
-  servicebus:
+  eventbus:
     image: rabbitmq:3.9-management
-    hostname: servicebus
-    container_name: servicebus
+    hostname: eventbus
+    container_name: eventbus
     ports:
-      - "5670:5672"
+      - "5672:5672"
       - "15672:15672"
     volumes:
-      - "./Servicebus/enabled_plugins:/etc/rabbitmq/enabled_plugins"
-      - "./Servicebus/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf"
+      - "./EventBus/enabled_plugins:/etc/rabbitmq/enabled_plugins"
+      - "./EventBus/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf"
     networks:
       - service_net
       
@@ -166,16 +203,38 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin  
       
-  redis:
+  cache:
     image: redis:6.2.5-alpine
-    container_name: redis
-    hostname: redis
+    container_name: cache
+    hostname: cache
     networks:
       - databases
     ports:
-      - "6379:6379"
+      - "6370:6379"
     volumes:
      - "./Redis/redis.conf:/usr/local/etc/redis/redis.conf"
+     
+  ratelimit:
+    image: redis:6.2.5-alpine
+    container_name: ratelimit
+    hostname: ratelimit
+    networks:
+      - databases
+    ports:
+      - "6371:6379"
+    volumes:
+     - "./Redis/redis.conf:/usr/local/etc/redis/redis.conf"
+     
+  statemachine:
+    image: redis:6.2.5-alpine
+    container_name: statemachine
+    hostname: statemachine
+    networks:
+      - databases
+    ports:
+      - "6372:6379"
+    volumes:
+     - "./Redis/redis.conf:/usr/local/etc/redis/redis.conf"      
      
   mssql:
     image: mcr.microsoft.com/mssql/server:2019-latest

@@ -40,6 +40,7 @@ namespace MediatorRequests.Test
                 .Verifiable();
         }
 
+        [Trait("Category", "Unit")]
         [Fact]
         public async Task Handle_GivenValid_ExpectDish()
         {

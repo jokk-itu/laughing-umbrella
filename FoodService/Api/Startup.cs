@@ -1,5 +1,7 @@
 using Jokk.Microservice.Cache;
+using Jokk.Microservice.Cache.Extensions;
 using Jokk.Microservice.Cors;
+using Jokk.Microservice.Cors.Extensions;
 using Jokk.Microservice.Log.Extensions;
 using Jokk.Microservice.Swagger;
 using MediatorRequests;
@@ -28,16 +30,23 @@ namespace Api
         {
             services.AddControllers();
 
+            //Logging
             services.AddMicroserviceLogging();
 
-            services.AddCacheStore();
+            //Cache
+            services.AddMicroserviceClientCache();
+            services.AddMicroserviceDistributedCache(
+                Configuration.GetSection("Cache").Get<CacheConfiguration>());
             
+            //AzureAD
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
 
+            //Infrastructure
             services.AddMediatR(typeof(ServiceEntrypoint).Assembly);
             services.AddAutoMapper(typeof(ObjectMapper.ServiceEntrypoint).Assembly);
 
+            //Database
             var neo4J = Configuration.GetSection("Neo4j");
             services.AddSingleton(_ => GraphDatabase.Driver(
                 neo4J.GetValue<string>("Uri"),
@@ -45,10 +54,15 @@ namespace Api
                     neo4J.GetValue<string>("Username"),
                     neo4J.GetValue<string>("Password"))));
 
+            //Swagger
             services.AddSwaggerAuthorization();
+            
+            //Cors
             services.AddMicroserviceCors(
-                Configuration.GetSection("Services"),
-                Configuration.GetSection("Methods"));
+                Configuration.GetSection("Cors").Get<CorsConfiguration>());
+            
+            //Prometheus
+            //services.AddMicroservicePrometheus();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -61,7 +75,8 @@ namespace Api
             app.UseMicroserviceLogging();
             app.UseMicroserviceCors();
             app.UseMicroserviceSwagger();
-            app.UseCacheStore();
+            app.UseMicroserviceClientCache();
+            //app.UseMicroservicePrometheus();
 
             app.UseRouting();
 
