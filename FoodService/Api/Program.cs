@@ -33,12 +33,20 @@ namespace Api
         private static void LogConfiguration(IServiceProvider serviceProvider)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
-            var logConfig = serviceProvider.GetRequiredService<LogConfiguration>();
-            var cacheConfig = serviceProvider.GetRequiredService<CacheConfiguration>();
-            var corsConfig = serviceProvider.GetRequiredService<CorsConfiguration>();
-            logger.LogInformation("Logging Configuration {Configuration}", JsonSerializer.Serialize(logConfig));
-            logger.LogInformation("Cache Configuration {Configuration}", JsonSerializer.Serialize(cacheConfig));
-            logger.LogInformation("Cors Configuration {Configuration}", JsonSerializer.Serialize(corsConfig));
+            var serializeOptions = new JsonSerializerOptions()
+            {
+                WriteIndented = true
+            };
+            var logConfig = JsonSerializer.Serialize(
+                serviceProvider.GetRequiredService<LogConfiguration>(), serializeOptions);
+            var cacheConfig = JsonSerializer.Serialize(
+                serviceProvider.GetRequiredService<CacheConfiguration>(), serializeOptions);
+            var corsConfig = JsonSerializer.Serialize(
+                serviceProvider.GetRequiredService<CorsConfiguration>(), serializeOptions);
+            
+            logger.LogInformation("Logging Configuration {Configuration}", logConfig);
+            logger.LogInformation("Cache Configuration {Configuration}", cacheConfig);
+            logger.LogInformation("Cors Configuration {Configuration}", corsConfig);
         }
     }
 }

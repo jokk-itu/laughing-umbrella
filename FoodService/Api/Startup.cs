@@ -1,6 +1,8 @@
+using Jokk.Microservice.Cache;
 using Jokk.Microservice.Cache.Extensions;
 using Jokk.Microservice.Cors;
 using Jokk.Microservice.Cors.Extensions;
+using Jokk.Microservice.Log;
 using Jokk.Microservice.Log.Extensions;
 using Jokk.Microservice.Swagger;
 using MediatorRequests;
@@ -30,12 +32,13 @@ namespace Api
             services.AddControllers();
 
             //Logging
-            services.AddMicroserviceLogging();
+            services.AddMicroserviceLogging(
+                Configuration.GetSection("Logging").Get<LogConfiguration>());
 
             //Cache
-            //services.AddMicroserviceClientCache();
-            //services.AddMicroserviceDistributedCache(
-            //    Configuration.GetSection("Cache").Get<CacheConfiguration>());
+            services.AddMicroserviceClientCache();
+            services.AddMicroserviceDistributedCache(
+                Configuration.GetSection("Cache").Get<CacheConfiguration>());
             
             //AzureAD
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

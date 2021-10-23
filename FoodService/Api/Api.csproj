@@ -8,9 +8,9 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="Jokk.Microservice.Cache" Version="1.0.3" />
-    <PackageReference Include="Jokk.Microservice.Cors" Version="1.0.4" />
-    <PackageReference Include="Jokk.Microservice.Log" Version="1.0.10" />
+    <PackageReference Include="Jokk.Microservice.Cache" Version="1.0.4" />
+    <PackageReference Include="Jokk.Microservice.Cors" Version="1.0.5" />
+    <PackageReference Include="Jokk.Microservice.Log" Version="1.0.12" />
     <PackageReference Include="Jokk.Microservice.Prometheus" Version="1.0.7" />
     <PackageReference Include="Jokk.Microservice.Swagger" Version="1.0.2" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
