@@ -12,17 +12,17 @@ scrape_configs:
     static_configs:
     - targets: ['127.0.0.1:9090']
 
-  - job_name: 'sports_api'
+  - job_name: 'sport_api'
     metrics_path: '/metrics'
     scrape_interval: 5s
     static_configs:
-    - targets: ['sports_api:80']
+    - targets: ['sport_api:80']
 
   - job_name: 'book_api'
     metrics_path: '/metrics'
     scrape_interval: 5s
     static_configs:
-    - targets: ['books_api:80']  
+    - targets: ['book_api:80']  
     
   - job_name: 'food_api'
     metrics_path: '/metrics'

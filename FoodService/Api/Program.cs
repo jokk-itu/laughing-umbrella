@@ -32,7 +32,7 @@ namespace Api
 
         private static void LogConfiguration(IServiceProvider serviceProvider)
         {
-            var logger = serviceProvider.GetRequiredService<ILogger>();
+            var logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
             var logConfig = serviceProvider.GetRequiredService<LogConfiguration>();
             var cacheConfig = serviceProvider.GetRequiredService<CacheConfiguration>();
             var corsConfig = serviceProvider.GetRequiredService<CorsConfiguration>();

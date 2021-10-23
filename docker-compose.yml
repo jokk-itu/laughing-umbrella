@@ -6,9 +6,9 @@ networks:
   databases:
 
 services:
-  sports_api:
+  sport_api:
     build:
-      context: ./SportsService
+      context: ./SportService
       dockerfile: Dockerfile
       args:
         - NUGET_API=${NUGET_API}
@@ -27,8 +27,8 @@ services:
       - ./EnvironmentFiles/cache.env
       - ./EnvironmentFiles/ratelimit.env
       - ./EnvironmentFiles/sportsapi.env
-    container_name: sports_api
-    hostname: sports_api
+    container_name: sport_api
+    hostname: sport_api
     networks:
       - databases
       - service_net
@@ -60,7 +60,7 @@ services:
       - databases
       - service_net
       
-  books_api:
+  book_api:
     build:
       context: ./BookService
       dockerfile: Dockerfile
@@ -81,8 +81,8 @@ services:
       - ./EnvironmentFiles/cache.env
       - ./EnvironmentFiles/ratelimit.env  
       - ./EnvironmentFiles/booksapi.env
-    container_name: books_api
-    hostname: books_api
+    container_name: book_api
+    hostname: book_api
     networks:
       - databases
       - service_net       
@@ -119,9 +119,9 @@ services:
     ports:
       - "5020:5020"
     depends_on:
-      - sports_api
+      - sport_api
       - food_api
-      - books_api
+      - book_api
     container_name: client
     networks:
       - service_net   

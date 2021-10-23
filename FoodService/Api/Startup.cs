@@ -1,4 +1,3 @@
-using Jokk.Microservice.Cache;
 using Jokk.Microservice.Cache.Extensions;
 using Jokk.Microservice.Cors;
 using Jokk.Microservice.Cors.Extensions;
@@ -34,9 +33,9 @@ namespace Api
             services.AddMicroserviceLogging();
 
             //Cache
-            services.AddMicroserviceClientCache();
-            services.AddMicroserviceDistributedCache(
-                Configuration.GetSection("Cache").Get<CacheConfiguration>());
+            //services.AddMicroserviceClientCache();
+            //services.AddMicroserviceDistributedCache(
+            //    Configuration.GetSection("Cache").Get<CacheConfiguration>());
             
             //AzureAD
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

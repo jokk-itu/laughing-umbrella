@@ -8,17 +8,17 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="Jokk.Microservice.Cache" Version="1.0.2" />
-    <PackageReference Include="Jokk.Microservice.Cors" Version="1.0.3" />
-    <PackageReference Include="Jokk.Microservice.Log" Version="1.0.9" />
+    <PackageReference Include="Jokk.Microservice.Cache" Version="1.0.3" />
+    <PackageReference Include="Jokk.Microservice.Cors" Version="1.0.4" />
+    <PackageReference Include="Jokk.Microservice.Log" Version="1.0.10" />
     <PackageReference Include="Jokk.Microservice.Prometheus" Version="1.0.7" />
     <PackageReference Include="Jokk.Microservice.Swagger" Version="1.0.2" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.8" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="1.1.0" />
-    <PackageReference Include="Neo4j.Driver" Version="4.3.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.11" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.18.0" />
+    <PackageReference Include="Neo4j.Driver" Version="4.3.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
