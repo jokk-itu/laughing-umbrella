@@ -1,9 +1,13 @@
+using System;
+using System.Collections.Generic;
 using Jokk.Microservice.Cache;
 using Jokk.Microservice.Cache.Extensions;
 using Jokk.Microservice.Cors;
 using Jokk.Microservice.Cors.Extensions;
+using Jokk.Microservice.HealthCheck.Extensions;
 using Jokk.Microservice.Log;
 using Jokk.Microservice.Log.Extensions;
+using Jokk.Microservice.Prometheus.Extensions;
 using Jokk.Microservice.Swagger;
 using MediatorRequests;
 using MediatR;
@@ -15,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Neo4j.Driver;
+using Prometheus;
 
 namespace Api
 {
@@ -29,42 +34,48 @@ namespace Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-
-            //Logging
-            services.AddMicroserviceLogging(
-                Configuration.GetSection("Logging").Get<LogConfiguration>());
-
-            //Cache
-            services.AddMicroserviceClientCache();
-            services.AddMicroserviceDistributedCache(
-                Configuration.GetSection("Cache").Get<CacheConfiguration>());
+            var logConfiguration = Configuration.GetSection("Logging").Get<LogConfiguration>();
+            var cacheConfiguration = Configuration.GetSection("Cache").Get<CacheConfiguration>();
+            var corsConfiguration = Configuration.GetSection("Cors").Get<CorsConfiguration>();
+            var healthCheckServices =
+                Configuration.GetSection("HealthCheck:Services").Get<IDictionary<string, string>>();
             
-            //AzureAD
+            services.AddControllers();
+            
+            services.AddMicroserviceLogging(logConfiguration);
+            
+            services.AddMicroserviceClientCache();
+            services.AddMicroserviceDistributedCache(cacheConfiguration);
+            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
-
-            //Infrastructure
+            
             services.AddMediatR(typeof(ServiceEntrypoint).Assembly);
             services.AddAutoMapper(typeof(ObjectMapper.ServiceEntrypoint).Assembly);
-
-            //Database
+            
             var neo4J = Configuration.GetSection("Neo4j");
             services.AddSingleton(_ => GraphDatabase.Driver(
                 neo4J.GetValue<string>("Uri"),
                 AuthTokens.Basic(
                     neo4J.GetValue<string>("Username"),
                     neo4J.GetValue<string>("Password"))));
-
-            //Swagger
+            
             services.AddSwaggerAuthorization();
             
-            //Cors
-            services.AddMicroserviceCors(
-                Configuration.GetSection("Cors").Get<CorsConfiguration>());
+            services.AddMicroserviceCors(corsConfiguration);
             
-            //Prometheus
-            //services.AddMicroservicePrometheus();
+            services.AddMicroservicePrometheus();
+            
+            /*foreach (var (name, uri) in healthCheckServices)
+                services.AddServiceHealthCheck(name, new Uri(uri))
+                    .ForwardToPrometheus();*/
+            
+            services.AddNeo4JHealthCheck("FoodDatabasePing")
+                .ForwardToPrometheus();
+            
+            /*services.AddRedisHealthCheck(
+                $"{cacheConfiguration.Password}@{cacheConfiguration.Host}:{cacheConfiguration.Port}")
+                .ForwardToPrometheus();*/
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -75,15 +86,16 @@ namespace Api
             }
             
             app.UseMicroserviceLogging();
+            app.UseMicroserviceClientCache();
             app.UseMicroserviceCors();
             app.UseMicroserviceSwagger();
-            app.UseMicroserviceClientCache();
-            //app.UseMicroservicePrometheus();
 
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
+            
+            app.UseMicroservicePrometheus();
             
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }

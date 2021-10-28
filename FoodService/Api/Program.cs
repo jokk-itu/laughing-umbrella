@@ -43,7 +43,7 @@ namespace Api
                 serviceProvider.GetRequiredService<CacheConfiguration>(), serializeOptions);
             var corsConfig = JsonSerializer.Serialize(
                 serviceProvider.GetRequiredService<CorsConfiguration>(), serializeOptions);
-            
+
             logger.LogInformation("Logging Configuration {Configuration}", logConfig);
             logger.LogInformation("Cache Configuration {Configuration}", cacheConfig);
             logger.LogInformation("Cors Configuration {Configuration}", corsConfig);

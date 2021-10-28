@@ -29,6 +29,11 @@ RETURN id(d) AS id, d.name AS name, d.price as price";
                 var result = await transaction.RunAsync(cypher, 
                     new { name = request.Name, price = request.Price });
                 var record = await result.PeekAsync();
+                if (record is null)
+                {
+                    await transaction.RollbackAsync();
+                    return null;
+                }
                 await transaction.CommitAsync();
                 return _mapper.Map<Dish>(record);
             });

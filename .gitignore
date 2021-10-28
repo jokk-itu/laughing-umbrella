@@ -13,3 +13,5 @@ nuget.config
 /Neo4j/import
 /Neo4j/logs
 /Neo4j/plugins
+/Mongo
+

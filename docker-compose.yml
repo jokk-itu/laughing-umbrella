@@ -142,6 +142,7 @@ services:
     ports:
       - "9090:9090"
     container_name: prometheus
+    hostname: prometheus
     volumes:
       - ./Monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
@@ -152,12 +153,10 @@ services:
     image: grafana/grafana
     ports:
       - "3000:3000"
-    volumes:
-      - ./Monitoring/grafana/:/var/lib/grafana
     container_name: grafana
     networks:
-      - monitoring 
-          
+      - monitoring
+       
   eventbus:
     image: rabbitmq:3.9-management
     hostname: eventbus
@@ -246,8 +245,8 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - ./MSSQL/primary/data:/var/opt/mssql/data
-      - ./MSSQL/primary/log:/var/opt/mssql/log
-      - ./MSSQL/primary/secrets:/var/opt/mssql/secrets
+      - ./MSSQL/data:/var/opt/mssql/data
+      - ./MSSQL/log:/var/opt/mssql/log
+      - ./MSSQL/secrets:/var/opt/mssql/secrets
     networks:
       - databases  
